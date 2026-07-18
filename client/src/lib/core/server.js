@@ -1,80 +1,49 @@
-const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
+import { getUserToken } from "./session";
 
-/**
- * authHeader — builds the Authorization header object from a Bearer token
- * @param {string} token
- * @returns {Object}
- */
-export function authHeader(token) {
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+export const authHeader = async () => {
+  const token = await getUserToken();
+  const header = {
+    authorization: `Bearer ${token}`,
   };
-}
+  return token ? header : {};
+};
 
-/**
- * protectedFetch — wraps fetch with an Authorization header
- * Use for GET requests to protected endpoints
- * @param {string} endpoint - relative path e.g. '/api/modules/mine'
- * @param {string} token - Bearer token
- * @param {RequestInit} options - additional fetch options
- */
-export async function protectedFetch(endpoint, token, options = {}) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    credentials: 'include',
+export const serverMutation = async (path, method, data) => {
+  const res = await fetch(`${baseUrl}/api/${path}`, {
+    method: method,
     headers: {
-      ...authHeader(token),
-      ...(options.headers || {}),
+      "Content-Type": "application/json",
+      ...await authHeader(),
+    },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};
+
+export const serverDelete = async (path) => {
+  const res = await fetch(`${baseUrl}/api/${path}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...await authHeader(),
     },
   });
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP ${res.status}`);
-  }
-
   return res.json();
-}
+};
 
-/**
- * serverMutation — wraps fetch for POST / PATCH / DELETE with auth header
- * @param {string} endpoint - relative path e.g. '/api/modules'
- * @param {string} token - Bearer token
- * @param {'POST'|'PATCH'|'DELETE'} method
- * @param {Object} body - request body (will be JSON stringified)
- */
-export async function serverMutation(endpoint, token, method = 'POST', body = null) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    method,
-    credentials: 'include',
-    headers: authHeader(token),
-    body: body ? JSON.stringify(body) : undefined,
+export const serverFetch = async (path) => {
+  const res = await fetch(`${baseUrl}/api/${path}`, {
+    cache: "no-store",
   });
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP ${res.status}`);
-  }
-
   return res.json();
-}
+};
 
-/**
- * publicFetch — plain GET request without auth (for public endpoints)
- * @param {string} endpoint - relative path
- * @param {RequestInit} options
- */
-export async function publicFetch(endpoint, options = {}) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    credentials: 'include',
+export const protectedFetch = async (path) => {
+  const res = await fetch(`${baseUrl}/api/${path}`, {
+    cache: "no-store",
+    headers: await authHeader(),
   });
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP ${res.status}`);
-  }
-
   return res.json();
-}
+};

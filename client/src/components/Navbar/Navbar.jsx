@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useSession } from '../lib/auth';
-import { signOut } from '../lib/auth';
+import { useAuth } from '../../context/AuthContext';
 
 const NAV_PUBLIC = [
   { label: 'Home', href: '/' },
@@ -23,16 +22,14 @@ const NAV_PRIVATE = [
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isAuthenticated = !!session?.user;
   const navLinks = isAuthenticated ? NAV_PRIVATE : NAV_PUBLIC;
 
   const handleSignOut = async () => {
-    await signOut();
-    router.push('/');
-    router.refresh();
+    await logout();
+    setMobileOpen(false);
   };
 
   const isActive = (href) => pathname === href;
@@ -73,7 +70,7 @@ export default function Navbar() {
 
           {/* ── Auth Buttons (Desktop) ───────────────────── */}
           <div className="hidden md:flex items-center gap-3">
-            {isPending ? (
+            {isLoading ? (
               <div className="w-20 h-8 rounded-lg skeleton" />
             ) : isAuthenticated ? (
               <div className="flex items-center gap-3">
@@ -81,20 +78,20 @@ export default function Navbar() {
                   href="/profile"
                   className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  {session.user.image ? (
+                  {user?.image ? (
                     <img
-                      src={session.user.image}
-                      alt={session.user.name}
+                      src={user.image}
+                      alt={user.name}
                       className="w-8 h-8 rounded-full border-2 border-indigo-200"
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                       <span className="text-indigo-600 font-semibold text-sm">
-                        {session.user.name?.[0]?.toUpperCase()}
+                        {user?.name?.[0]?.toUpperCase()}
                       </span>
                     </div>
                   )}
-                  <span className="font-medium">{session.user.name?.split(' ')[0]}</span>
+                  <span className="font-medium">{user?.name?.split(' ')[0]}</span>
                 </Link>
                 <button
                   onClick={handleSignOut}

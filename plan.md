@@ -26,18 +26,18 @@
 2. **Feature 2 (Stateful Memory Recalibration):** Create `/api/ai/recalibrate`. Gemini acts as a smart planner, analyzing completed tasks in MongoDB and dynamically restructuring uncompleted future tasks[cite: 6].
 
 ### Phase 3: Client Core & Authentication
-**Goal:** Scaffold Next.js and implement your custom fetch/session utilities.
+**Goal:** Scaffold Next.js and implement your custom fetch/session utilities following Hireloop structure.
 1. Configure Tailwind CSS with the exact 3-color palette[cite: 6].
-2. Setup Better Auth in `/client/src/lib/auth.js`.
+2. Setup Better Auth in `/client/src/lib/auth.js` (Server) and `/client/src/lib/auth-client.js` (Client).
 3. Build your core utilities[cite: 6]:
-   - `/client/src/lib/core/session.js` (`getUserSession`, `getUserToken`).
+   - `/client/src/lib/core/session.js` (`getUserSession`, `getUserToken` using `auth.js`).
    - `/client/src/lib/core/server.js` (`authHeader`, `serverMutation`, `protectedFetch`).
 4. Create `/login` and `/register` pages with React Hook Form, explicit error handling (`border-red-500`), and a "Login as Demo Student" button[cite: 6].
 
 ### Phase 4: Public UI & Layout (Client)
-**Goal:** Build the mandatory public routes and responsive layouts.
-1. Build sticky Navbar and functional Footer (with real contacts/links)[cite: 6].
-2. **Home Page (`/`):** Must contain exactly 7 sections (Hero, Features, Statistics, Mechanics, Testimonials, FAQ, CTA)[cite: 6].
+**Goal:** Build the mandatory public routes and responsive layouts using capitalized component folders.
+1. Build sticky Navbar (`/components/Navbar/Navbar.jsx`) and functional Footer (`/components/Footer/Footer.jsx`)[cite: 6].
+2. **Home Page (`/`):** Must contain exactly 7 sections (Hero, Features, Statistics, Mechanics, Testimonials, FAQ, CTA)[cite: 6]. Store sections in `/components/Homepage/`.
 3. Build **About** (`/about`) and **Contact** (`/contact`) pages[cite: 6].
 
 ### Phase 5: Explore & Details Canvas

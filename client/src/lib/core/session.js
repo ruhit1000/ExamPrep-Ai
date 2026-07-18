@@ -1,27 +1,30 @@
-import { getSession } from '../auth';
+import { headers } from "next/headers"
+import { auth } from "../auth"
+import { redirect } from "next/navigation";
 
-/**
- * getUserSession — returns the full session object (user + token)
- * Returns null if no active session
- */
-export async function getUserSession() {
-  try {
-    const session = await getSession();
-    return session?.data ?? null;
-  } catch {
-    return null;
-  }
+export const getUserSession = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  })
+
+  return session?.user || null;
 }
 
-/**
- * getUserToken — extracts the raw Bearer token from the session
- * Returns null if no active session
- */
-export async function getUserToken() {
-  try {
-    const session = await getSession();
-    return session?.data?.session?.token ?? null;
-  } catch {
-    return null;
+export const getUserToken = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  })
+
+  return session?.session?.token || null;
+}
+
+export const requireRole = async (role) => {
+  const user = await getUserSession();
+  if (!user) {
+    redirect("/login");
   }
+  if (user?.role !== role) {
+    redirect("/unauthorized");
+  }
+  return user;
 }
